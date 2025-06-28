@@ -1,4 +1,4 @@
-````md
+
 # IAM: Identity and Access Management (Comprehensive Notes)
 
 AWS IAM (Identity and Access Management) is the **core service** used to manage **access and permissions** for AWS resources. It enables you to **securely control who is authenticated** (signed in) and **authorized** (has permissions) to use AWS services and resources.
