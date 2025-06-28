@@ -1,159 +1,232 @@
-# EC2: Virtual Machines
+# 🖥️ Amazon EC2 – Elastic Compute Cloud
 
-- [EC2 User Data](#ec2-user-data)
-- [EC2 Meta Data](#ec2-meta-data)
-- [EC2 Instance Launch Types](#ec2-instance-launch-types)
-- [EC2 Pricing](#ec2-pricing)
-- [AMIs](#AMIs)
-- [EC2 Instances Overview](#ec2-instances-overview)
+Amazon EC2 (Elastic Compute Cloud) is one of the most foundational AWS services. It lets you provision **virtual machines** in the cloud, with flexible configuration, scaling, pricing, and control.
 
-By default, your EC2 machine comes with:
-* A private IP for the internal AWS Network
-* A public IP for the WWW
+---
 
-When you SSH into your EC2 machine:
-* We can’t use a private IP, because we are not in the same network
-* We can only use the public IP
+## ⚙️ What Does EC2 Offer?
 
-If your machine is stopped and then restarted, the public IP will change
+- Launch **virtual servers** (EC2 instances)
+- Attach **block storage** (EBS)
+- Use **ELB** for traffic distribution
+- Enable **Auto Scaling Groups (ASG)** for horizontal scaling
 
-## EC2 User Data
-* It is possible to bootstrap our instances using an EC2 User data script
-* Bootstrapping means launching commands when a machine starts
-* That script is only run once at the instance first start
-* Purpose: Ec2 data is used to automated boot tasks such as:
-    * Installing updates
-    * Installing software
-    * Downloading common files from the internet
-* The EC2 User Data Script runs with the root user
-  
-## EC2 Meta Data
-* Information about your EC2 instance
-* It allows EC2 instances to "learn" about themselves without having to use an IAM role for that purpose
-* Powerful but one of the least known features to developers
-* You can retrieve IAM roles from the metadata but **not** IAM policies
-* URL: {ec2-ip-address}/latest/meta-data
+> 📌 EC2 is part of the **Infrastructure-as-a-Service (IaaS)** model
 
-## EC2 Instance Launch Types 
-- **On Demand Instances**: short workload, predictable pricing
-- **Reserved Instances**: long workloads (>= 1 year)
-- **Convertible Reserved Instances**: long workloads with flexible instances
-- **Scheduled Reserved Instances**: launch within time window you reserve
-- **Spot Instances**: short workloads, for cheap, can lose instances
-- **Dedicated Instances**: no other customers will share your hardware
-- **Dedicated Hosts**: book an entire physical server, control instance placement
+---
 
-#### On Demand Instance:
-* Pay for what you use
-* Has the highest cost but no upfront payment
-* No long term commitment
-* Recommended for short-term and un-interrupted workloads, where you can’t predict how the application will behave
-#### Reserved Instances
-* Up to 75% compared to On-demand
-* Pay upfront for what you use with long term commitment
-* Reservation period can be 1 or 3 years
-* Reserve a specific instance type
-* Recommended for steady state usage applications (think database)
-#### Convertible Reserved Instances
-* Can change the EC2 instance type
-* Up to 54% discount
-#### Scheduled Reserved Instances
-* Launch within time window you reserve
-* When you require a fraction of a day / week / month
-#### Spot Instances
-* Can get a discount of up to 90% compared to On-demand
-* You bid a price and get the instance as long as it's under the price
-* Price varies based on offer and demand
-* Spot instances are reclaimed within a 2-minute notification warning when the spot price goes above your bid
-* Used for batch jobs, Big Data analysis, or workloads that are resilient to failures
-* Not great for critical jobs or databases
-#### Dedicated Instances
-* Instances running on hardware that’s dedicated to you
-* May share hardware with other instances in same account
-* No control over instance placement (can move hardware after stop / start)
-#### Dedicated Hosts
-* Physical dedicated Ec2 server for your use
-* Full control of Ec2 Instance placement
-* Visibility into the underlying sockets / physical cores of the hardware
-* Allocated for your account for a 3-year period reservation
-* More expensive
-* Useful for software that have a complicated licensing model (Bring your own License)
-* Or for a companies that have strong regulatory or compliance needs
+## 📦 EC2 Instance Configuration Options
 
-#### Which host is right for me?
-- On demand: coming and staying in resort whenever we like, we pay the full price 
-- Reserved: like planning ahead and if we plan to stay for a long time, we may get a good discount. 
-- Spot instances: the hotel allows people to bid for the empty rooms and the highest bidder keeps the rooms.You can get kicked out at any time 
-- Dedicated Hosts: We book an entire building of the resort
+| Element                | Description                                                                 |
+|------------------------|-----------------------------------------------------------------------------|
+| Operating System       | Linux, Windows, macOS                                                       |
+| CPU / vCPUs            | Number of virtual cores                                                     |
+| RAM                    | Memory in GiB                                                               |
+| Storage                | EBS or ephemeral Instance Store                                             |
+| Networking             | Public/Private IP, Bandwidth, ENI                                           |
+| Security               | Controlled via **Security Groups**                                          |
+| Key Pair               | SSH Key for secure access                                                   |
+| Bootstrap Script       | EC2 **User Data** to auto-configure software at launch                      |
 
-## EC2 Pricing
-- EC2 instances prices (per hour) varies based on these parameters:
-  - Region you’re in
-  - Instance Type you’re using
-  - On-Demand vs Spot vs Reserved vs Dedicated Host
-  - Linux vs Windows vs Private OS (RHEL, SLES, Windows SQL)
-  - You are billed by the second, with a minimum of 60 seconds. 
-  - You also pay for other factors such as storage, data transfer, fixed IP public addresses, load balancing
-  - You do not pay for the instance if the instance is stopped 
+---
 
-- Example
-  - t2.small in US-EAST-1 (VIRGINIA), cost $0.023 per Hour 
-  - If used for:
-    - 6 seconds, it costs $0.023/60 = $0.000383 (minimum of 60 seconds)
-    - 60 seconds, it costs $0.023/60 = $0.000383 (minimum of 60 seconds)
-    - 30 minutes, it costs $0.023/2 = $0.0115
-    - 1 month, it costs $0.023 * 24 * 30 = $16.56 (assuming a month is 30 days)
-    - X seconds (X > 60), it costs $0.023 * X / 3600 
-  - The best way to know the pricing is to consult the pricing page: https://aws.amazon.com/ec2/pricing/on-demand/
+## 🚀 EC2 Instance Launch Types
 
-## AMIs
-### What's AMI?
-- As we saw, AWS comes with base images such as:
-  - Ubuntu
-  - Fedora
-  - RedHat
-  - Windows
-  - Etc...
-- These images can be customized at runtime using EC2 User data
-- But what if we could create our own image, ready to go?
-- That’s an AMI – an image to use to create our instances
-- AMIs can be built for Linux or Windows machines 
+| Type                      | Description                                                                            |
+|---------------------------|----------------------------------------------------------------------------------------|
+| On-Demand                 | Pay by the second, no upfront cost, highest flexibility                               |
+| Reserved Instances        | 1–3 year commitment, up to 75% savings                                                 |
+| Convertible Reserved      | Can switch instance families/types                                                    |
+| Scheduled Reserved        | Launch during reserved time blocks                                                    |
+| Spot Instances            | Up to 90% cheaper, can be terminated with 2 min warning                               |
+| Dedicated Instances       | Run on hardware isolated to your account                                              |
+| Dedicated Hosts           | Full physical server access (compliance or licensing constraints)                     |
 
-### Why you use a custom AMI?
-- Using a custom-built AMI can provide the following advantages:
-  - Pre-installed packages needed
-  - Faster boot time (no need for long ec2 user data at boot time
-  - Machine comes configured with monitoring / enterprise software
-  - Security concerns – control over the machines in the network
-  - Control of maintenance and updates of AMIs over time
-  - Active Directory Integration out of the box
-  - Installing your app ahead of time (for faster deploys when auto-scaling)
-  - Using someone else’s AMI that is optimized for running an app, DB, etc...
-- **AMI are built for a specific AWS region (!)**
+---
 
-## EC2 Instances Overview
-- Instances have 5 distinct characteristics advertised on the website:
-  - The RAM(type,amount,generation)
-  - The CPU(type,make,frequency,generation,numberofcores)
-  - The I/O (disk performance, EBS optimisations)
-  - The Network (network bandwidth, network latency
-  - The Graphical Processing Unit (GPU) 
-- It may be daunting to choose the right instance type (there are over 50 of them) - https://aws.amazon.com/ec2/instance-types/ 
-- https://ec2instances.info/ can help with summarizing the types of instances 
-- R/C/P/G/H/X/I/F/Z/CR are specialised in RAM, CPU, I/O, Network, GPU 
-- M instance types are balanced 
-- T2/T3 instance types are “burstable”
-Burstable Instances (T2)
-- AWS has the concept of burstable instances (T2 machines) 
-- Burst means that overall, the instance has OK CPU performance. 
-- When the machine needs to process something unexpected (a spike in load for example), it can burst, and CPU can be VERY good. 
-- If the machine bursts, it utilizes “burst credits” 
-- If all the credits are gone, the CPU becomes BAD 
-- If the machine stops bursting, credits are accumulated over time
-- Burstable instances can be amazing to handle unexpected traffic and getting the insurance that it will be handled correctly 
-- If your instance consistently runs low on credit, you need to move to a different kind of non-burstable instance (all the ones described before). 
+## 🧱 EC2 Instance Types Overview
 
-### T2 Unlimited 
-- Nov 2017: It is possible to have an “unlimited burst credit balance
-- You pay extra money if you go over your credit balance, but you don’t lose in performance
-- Overall, it is a new offering, so be careful, costs could go high if you’re not monitoring the health of your instances 
+Each EC2 instance has characteristics:
+
+| Factor        | Description                                      |
+|---------------|--------------------------------------------------|
+| Compute       | vCPU, generation                                 |
+| Memory        | RAM amount/type                                  |
+| Storage       | EBS / Ephemeral / NVMe                           |
+| Networking    | Bandwidth, latency                               |
+| GPU           | ML, rendering, HPC                               |
+
+🔗 https://aws.amazon.com/ec2/instance-types/  
+🔗 https://instances.vantage.sh
+
+---
+
+## 🧠 EC2 Family Examples
+
+| Family | Optimized For              | Example Use Cases                            |
+|--------|----------------------------|-----------------------------------------------|
+| T      | Burstable General Purpose  | Low consistent usage, test/dev               |
+| M      | Balanced                   | Web servers, app servers                     |
+| C      | Compute Optimized          | Gaming servers, scientific modeling          |
+| R      | Memory Optimized           | Caches, large DBs, BI workloads              |
+| I      | Storage Optimized          | NoSQL, OLTP, analytics                       |
+| G/F/P  | GPU-based                  | ML training, AI inference, rendering         |
+| X/Z/H  | High memory/custom         | SAP, specialized enterprise workloads        |
+
+---
+
+## 💥 Burstable Instances – T Series
+
+### T2/T3 Overview
+
+- Accumulate **CPU credits**
+- Credits consumed when bursting beyond baseline
+
+### T2 Unlimited Mode
+
+- Continue bursting **even when out of credits**
+- Pay extra for exceeded usage
+- Ideal for workloads with unexpected spikes
+
+---
+
+## 🔧 EC2 User Data
+
+- Used to **bootstrap** an instance at launch (runs **once only**)
+- Runs as **root user**
+- Ideal for:
+  - Installing packages
+  - Running startup scripts
+  - Downloading files from the internet
+
+---
+
+## 📡 EC2 Meta Data
+
+- Accessible from within the instance:  
+  `http://169.254.169.254/latest/meta-data/`
+
+- Useful to retrieve:
+  - Instance ID
+  - AMI ID
+  - Security Group
+  - IAM Role (but not IAM Policy)
+  - Public/Private IPs
+
+---
+
+## 🔐 Security Groups
+
+- Act as **virtual firewalls** for EC2
+- Control **inbound/outbound traffic**
+- Attached to **ENI**, not the instance directly
+- Stateless → Must define **both inbound & outbound rules**
+
+---
+
+## 🔑 Key Pairs
+
+- SSH public/private key pair used to login to EC2
+- Generated once during instance launch or externally via AWS Console
+- If you lose the private key, you cannot SSH into the instance
+
+---
+
+## 📍 Elastic IPs (EIP)
+
+- **Static public IP** for your EC2 instance
+- **1 free EIP per region**, but you pay if not associated
+- Use case: When you need a persistent public IP across stops/reboots
+
+---
+
+## ⚖️ Placement Groups
+
+Used for **instance placement strategy** across physical hardware.
+
+| Type       | Behavior                                                                 |
+|------------|--------------------------------------------------------------------------|
+| Cluster    | Same rack for low latency / high throughput networking                   |
+| Spread     | Separate hardware → Max availability                                     |
+| Partition  | Spread across partitions (groups of racks) for fault isolation           |
+
+---
+
+## 📈 EC2 Monitoring
+
+| Type              | Details                                     |
+|-------------------|---------------------------------------------|
+| Basic Monitoring  | Metrics every **5 minutes** (free)          |
+| Detailed Monitoring | Metrics every **1 minute** (paid)         |
+| Tools             | CloudWatch, CloudTrail, EC2 dashboard       |
+
+---
+
+## 💾 EC2 Storage Options
+
+### 1. EBS – Elastic Block Store
+
+- Network-attached storage for EC2
+- Data **persists** after instance stop
+- Types:
+  - General Purpose (gp3/gp2)
+  - Provisioned IOPS (io1/io2)
+  - Throughput optimized (st1)
+  - Cold HDD (sc1)
+
+### 2. Instance Store
+
+- Ephemeral local storage (physically attached)
+- **Data lost** when instance stops or terminates
+- Use for:
+  - Buffer/cache
+  - Temp data
+
+---
+
+## 🧱 AMI – Amazon Machine Image
+
+- **Template** for launching EC2 with pre-installed OS/software
+- Public or private
+- Custom AMIs useful for:
+  - Faster boot
+  - Pre-installed dependencies
+  - Security and consistency
+
+---
+
+## 🧾 EC2 Pricing Model
+
+| Factor                | Examples                                                        |
+|------------------------|-----------------------------------------------------------------|
+| Instance type          | `t2.micro`, `m5.large`, etc.                                    |
+| Purchase option        | On-Demand, Reserved, Spot, Dedicated                            |
+| OS and Licensing       | Linux (cheaper), Windows, RHEL                                  |
+| Region                 | Pricing varies by region                                        |
+| Usage time             | Billed **per second**, minimum 60 seconds                       |
+| Extra charges          | EBS, NAT Gateway, Elastic IPs (idle), data transfer             |
+
+---
+
+## 🛡️ Shared Responsibility Model for EC2
+
+| AWS Manages                                 | You Manage                                    |
+|---------------------------------------------|-----------------------------------------------|
+| Physical hardware, network, hypervisor      | EC2 instance OS, updates, application logic   |
+| Data center, storage infrastructure          | Data, security patches, firewall (SG/NACLs)   |
+| Hardware security                            | IAM roles, SSH key rotation, monitoring       |
+
+---
+
+## 🧠 EC2 Key Exam Takeaways
+
+- EC2 = IaaS virtual servers
+- Choose right **instance type** and **purchase option**
+- Use **Security Groups** and **Key Pairs** for security
+- Leverage **User Data** to automate instance setup
+- Store persistent data in **EBS**, not Instance Store
+- **Elastic IPs** are static IPs, but chargeable when unassociated
+- Understand **burstable T2/T3**, AMIs, placement groups
+- Watch out for shared responsibility boundaries
+
+---
