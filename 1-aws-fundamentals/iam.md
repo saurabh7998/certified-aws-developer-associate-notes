@@ -166,6 +166,21 @@ IAM **policies** define **permissions** for actions in AWS:
 
 ---
 
+## How can users access AWS ?
+ * To access AWS, you have three options:
+   * AWS Management Console (protected by password + MFA)
+   * AWS Command Line Interface (CLI): protected by access keys
+   * AWS Software Developer Kit (SDK) - for code: protected by access keys
+   * Access Keys are generated through the AWS Console
+   * Users manage their own access keys • Access Keys are secret, just like a password. Don’t share them • Access Key ID ~= username
+   * Secret Access Key ~= password
+
+## IAM Security Tools NOT FOR DISTRIBUTION  
+* IAM Credentials Report (account-level)
+  * a report that lists all your account's users and the status of their various credentials
+* IAM Access Advisor (user-level) • Access advisor shows the service permissions granted to a user and when those services were last accessed.
+  * You can use this information to revise your policies.
+
 ## 🛡️ IAM Best Practices
 
 * Create **one IAM user per person** (no shared accounts).
