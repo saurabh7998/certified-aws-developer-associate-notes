@@ -1,50 +1,193 @@
-# IAM: Identity and Access Management
+````md
+# IAM: Identity and Access Management (Comprehensive Notes)
 
-When accessing AWS, the root account should **never** be used. Users must be created with the proper permissions. IAM is central to AWS.
-- Users: A physical person
-- Groups: Functions (admin, devops) Teams (engineering, design) which contain a group of users
-- Roles: Internal usage within AWS resources
-- Policies (JSON documents): Defines what each of the above can and cannot do. **Note**: IAM has predefined managed policies.
+AWS IAM (Identity and Access Management) is the **core service** used to manage **access and permissions** for AWS resources. It enables you to **securely control who is authenticated** (signed in) and **authorized** (has permissions) to use AWS services and resources.
 
+---
 
-#### For big enterprises:
-- IAM Federation: Integrate their own repository of users with IAM using SAML standard
+## 👥 IAM Core Concepts
 
-### Policies
-IAM policies define permissions for an action regardless of the method that you use to perform the operation.
+- **Users**: A person or system needing access to AWS services.
+- **Groups**: Collections of IAM users (e.g., "Developers", "Admins") to apply common permissions.
+- **Roles**: IAM identities that AWS services or applications assume to perform actions on your behalf.
+- **Policies**: JSON documents defining permissions.
 
-#### Policy types
-- Identity-based policies
-  - Attach managed and inline policies to IAM identities (users, groups to which users belong, or roles). Identity-based policies grant permissions to an identity.
+> ❗ **Never use the root account except for initial setup. Always create individual IAM users with least privilege.**
 
-- Resource-based policies
-  - Attach inline policies to resources. The most common examples of resource-based policies are Amazon S3 bucket policies and IAM role trust policies. Resource-based policies grant permissions to a principal entity that is specified in the policy. Principals can be in the same account as the resource or in other accounts.
+---
 
-- Permissions boundaries
-  - Use a managed policy as the permissions boundary for an IAM entity (user or role). That policy defines the maximum permissions that the identity-based policies can grant to an entity, but does not grant permissions. Permissions boundaries do not define the maximum permissions that a resource-based policy can grant to an entity.
+## 🧾 What is a Policy?
 
-- Organizations SCPs
-  - Use an AWS Organizations service control policy (SCP) to define the maximum permissions for account members of an organization or organizational unit (OU). SCPs limit permissions that identity-based policies or resource-based policies grant to entities (users or roles) within the account, but do not grant permissions.
+IAM **policies** define **permissions** for actions in AWS:
+- Who can do **what**, **on which resource**, and **under what conditions**.
+- Policies are written in **JSON** and follow a specific structure.
 
-- Access control lists (ACLs)
-  - Use ACLs to control which principals in other accounts can access the resource to which the ACL is attached. ACLs are similar to resource-based policies, although they are the only policy type that does not use the JSON policy document structure. ACLs are cross-account permissions policies that grant permissions to the specified principal entity. ACLs cannot grant permissions to entities within the same account.
+---
 
-- Session policies
-  - Pass advanced session policies when you use the AWS CLI or AWS API to assume a role or a federated user. Session policies limit the permissions that the role or user's identity-based policies grant to the session. Session policies limit permissions for a created session, but do not grant permissions. For more information, see Session Policies.
+## 🔐 IAM Policy Structure (JSON Format)
 
-#### AWS Policy Simulator
-- When creating new custom policies you can test it here:
-  - https://policysim.aws.amazon.com/home/index.jsp
-  - This policy tool can you save you time in case your custom policy statement's permission is denied
-- Alternatively, you can use the CLI:
-    - Some AWS CLI commands (not all) contain `--dry-run` option to simulate API calls. This can be used to test permissions.
-    - If the command is successful, you'll get the message: `Request would have succeeded, but DryRun flag is set`
-    - Otherwise, you'll be getting the message: `An error occurred (UnauthorizedOperation) when calling the {policy_name} operation`
-  
-#### Best practices:
-- One IAM User per person **ONLY**
-- One IAM Role per Application
-- IAM credentials should **NEVER** be shared
-- Never write IAM credentials in your code. **EVER**
-- Never use the ROOT account except for initial setup
-- It's best to give users the minimal amount of permissions to perform their job
+### 1. `Version`
+- Specifies policy language version.
+```json
+"Version": "2012-10-17"
+````
+
+### 2. `Id` *(Optional)*
+
+* Identifier for the policy.
+
+### 3. `Statement` (Required)
+
+* The array/object that holds the permission rules.
+
+### Each Statement contains:
+
+| Field       | Purpose                                                                 |
+| ----------- | ----------------------------------------------------------------------- |
+| `Sid`       | (Optional) Statement ID                                                 |
+| `Effect`    | `"Allow"` or `"Deny"`                                                   |
+| `Principal` | **Who** the policy applies to (only in resource-based policies)         |
+| `Action`    | **What** actions are allowed or denied (e.g., `"s3:GetObject"`)         |
+| `Resource`  | **Which AWS resources** the action applies to (e.g., an S3 bucket)      |
+| `Condition` | (Optional) **When** the statement is in effect (e.g., based on IP, MFA) |
+
+---
+
+## 📌 Key Terms
+
+### 🎯 What is a Resource?
+
+* A specific AWS entity you are controlling access to.
+* Examples:
+
+  * `arn:aws:s3:::my-bucket/*` — All objects in an S3 bucket
+  * `arn:aws:dynamodb:us-east-1:123456789012:table/my-table`
+* Mentioned in the `Resource` field of a policy.
+
+### 👤 What is a Principal?
+
+* The **identity (user, role, account, or service)** that is receiving the permissions.
+* Used only in **resource-based policies**.
+* Examples:
+
+  * IAM user ARN
+  * AWS service like `"lambda.amazonaws.com"`
+  * Account: `"Principal": {"AWS": "arn:aws:iam::123456789012:root"}`
+
+---
+
+## ✅ IAM Policy Example
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowS3Access",
+      "Effect": "Allow",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::example-bucket/*",
+      "Condition": {
+        "IpAddress": {
+          "aws:SourceIp": "192.0.2.0/24"
+        }
+      }
+    }
+  ]
+}
+```
+
+---
+
+## 🔑 Types of Policies
+
+### 1. **Identity-based Policies**
+
+* Attach to **users**, **groups**, or **roles**.
+* Grant permissions directly to IAM identities.
+* Can be:
+
+  * **Managed** (AWS or customer-created)
+  * **Inline** (embedded in a single identity)
+
+### 2. **Resource-based Policies**
+
+* Attach directly to AWS resources (e.g., S3 bucket policies, Lambda permissions).
+* Include a **Principal** field to define who has access.
+* Support **cross-account access**.
+
+### 3. **Permissions Boundaries**
+
+* Advanced feature to set the **maximum permissions** a user or role can have.
+* Used to **restrict** what identity-based policies can grant.
+* Do **not** grant permissions on their own.
+
+### 4. **Service Control Policies (SCPs)**
+
+* Used in **AWS Organizations**.
+* Set **permission guardrails** for **all accounts** in an Organization or Organizational Unit (OU).
+* Define **maximum available permissions**.
+* Do **not** grant permissions — they **limit** what can be granted.
+
+**Example Use Case:** Prevent use of specific regions or services across all child accounts.
+
+### 5. **Access Control Lists (ACLs)**
+
+* Used for **legacy and cross-account** access in services like S3.
+* Controls **who can access a resource and what actions they can perform**.
+* Do **not use JSON**, unlike IAM policies.
+* Cannot grant permissions to users in the same account.
+* Mostly used in **S3** and **Amazon EFS**.
+
+### 6. **Session Policies**
+
+* Passed when using `sts:AssumeRole` or federated sign-in.
+* Apply **temporary restrictions** for the session only.
+* Do **not grant** permissions — they **limit** permissions during a session.
+
+---
+
+## 🧪 IAM Policy Testing Tools
+
+### ✅ AWS Policy Simulator
+
+* Use to test IAM and resource-based policies.
+* 🔗 [AWS Policy Simulator](https://policysim.aws.amazon.com/home/index.jsp)
+
+### ✅ CLI — Dry Run Option
+
+* Many CLI commands support `--dry-run` to test permissions.
+* If allowed:
+
+  > `Request would have succeeded, but DryRun flag is set`
+* If denied:
+
+  > `An error occurred (UnauthorizedOperation)...`
+
+---
+
+## 🛡️ IAM Best Practices
+
+* Create **one IAM user per person** (no shared accounts).
+* Create **one IAM role per application or service**.
+* **Never embed credentials** in code or push to Git.
+* Use **IAM roles** (with temporary credentials) for EC2, Lambda, etc.
+* **Avoid root account** after initial setup — delete its access keys.
+* Apply **least privilege principle** — give only necessary permissions.
+* Enable **MFA** for all users.
+* Rotate access keys regularly.
+* Use **SCPs** for governance in multi-account setups.
+
+---
+
+## 📝 Summary Table: IAM Policy Types
+
+| Policy Type                  | Grants Permissions? | Attached To                | Notes                                                        |
+| ---------------------------- | ------------------- | -------------------------- | ------------------------------------------------------------ |
+| Identity-based               | ✅                   | Users, Groups, Roles       | Standard way to define permissions                           |
+| Resource-based               | ✅                   | AWS resources              | Supports cross-account access. Requires `Principal`          |
+| Permissions Boundary         | ❌                   | IAM Users/Roles            | Sets **maximum** permissions allowed, does not grant any     |
+| SCP (Service Control Policy) | ❌                   | AWS Accounts (via Org/OUs) | Used for account-wide guardrails. Requires AWS Organizations |
+| ACL                          | ✅ (limited)         | S3, EFS resources          | Older system, only cross-account; not JSON-based             |
+| Session Policy               | ❌                   | Temporary Sessions         | Restricts permissions during a session (STS/federated)       |
+
