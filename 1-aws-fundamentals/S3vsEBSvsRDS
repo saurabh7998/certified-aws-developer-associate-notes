@@ -1,0 +1,35 @@
+Here’s a **clear and exam-focused breakdown** of the differences between **S3, EBS, and RDS** in AWS. Use this for your AWS Certified Developer – Associate exam prep. You can copy-paste directly into your `README.md` notes.
+
+---
+
+## 🧠 S3 vs EBS vs RDS – Key Differences
+
+| Feature / Service | S3 (Simple Storage Service)                          | EBS (Elastic Block Store)                  | RDS (Relational Database Service)                     |
+| ----------------- | ---------------------------------------------------- | ------------------------------------------ | ----------------------------------------------------- |
+| **Type**          | Object Storage                                       | Block Storage                              | Managed Relational Database                           |
+| **Used For**      | Storing files, backups, static websites, logs, media | Attaching persistent storage to EC2        | Hosting SQL-based databases (MySQL, PostgreSQL, etc.) |
+| **Data Format**   | Objects (files) stored in buckets                    | Blocks attached to EC2 as volumes          | Tables, rows (structured data)                        |
+| **Access Method** | HTTP(s) API / SDK / S3 Console                       | EC2 instance mount (as a volume)           | SQL queries via endpoint                              |
+| **Persistence**   | Yes – across regions (optionally)                    | Yes – persists across EC2 restarts         | Yes – managed backup, replication                     |
+| **Durability**    | 99.999999999% (11 9s)                                | 99.999%                                    | Depends on configuration                              |
+| **Scalability**   | Virtually unlimited                                  | Limited by volume size                     | Scales vertically & horizontally (with Aurora)        |
+| **Backup**        | Built-in versioning, lifecycle                       | Snapshots                                  | Automated backups, snapshots                          |
+| **Encryption**    | Server-side encryption (SSE), client-side encryption | AES-256 encryption supported               | Encryption at rest and in transit                     |
+| **Latency**       | High (not for frequent I/O)                          | Low (suitable for OS/files)                | Moderate (optimized for DB access)                    |
+| **Use Case**      | Static file hosting, backups, media storage          | EC2 root volume, file system, DB data disk | Managed SQL DBs without handling infra                |
+
+---
+
+## 📝 In Simple Words:
+
+* **S3** is like Google Drive – store files, media, backups.
+* **EBS** is like a hard drive – attached to EC2 like your laptop's disk.
+* **RDS** is a hosted database – you use it like MySQL/Postgres without managing the machine.
+
+---
+
+If you're learning for the **AWS Developer Associate** exam, remember:
+
+* **S3** = Object storage (event-driven, serverless triggers possible)
+* **EBS** = Block storage for EC2 (must be attached to an instance)
+* **RDS** = Fully managed SQL database (with options like read replicas, multi-AZ, etc.)
