@@ -1,22 +1,18 @@
-Here’s a **clear and exam-focused breakdown** of the differences between **S3, EBS, and RDS** in AWS. Use this for your AWS Certified Developer – Associate exam prep. You can copy-paste directly into your `README.md` notes.
-
----
-
 ## 🧠 S3 vs EBS vs RDS – Key Differences
 
-| Feature / Service | S3 (Simple Storage Service)                          | EBS (Elastic Block Store)                  | RDS (Relational Database Service)                     |
-| ----------------- | ---------------------------------------------------- | ------------------------------------------ | ----------------------------------------------------- |
-| **Type**          | Object Storage                                       | Block Storage                              | Managed Relational Database                           |
-| **Used For**      | Storing files, backups, static websites, logs, media | Attaching persistent storage to EC2        | Hosting SQL-based databases (MySQL, PostgreSQL, etc.) |
-| **Data Format**   | Objects (files) stored in buckets                    | Blocks attached to EC2 as volumes          | Tables, rows (structured data)                        |
-| **Access Method** | HTTP(s) API / SDK / S3 Console                       | EC2 instance mount (as a volume)           | SQL queries via endpoint                              |
-| **Persistence**   | Yes – across regions (optionally)                    | Yes – persists across EC2 restarts         | Yes – managed backup, replication                     |
-| **Durability**    | 99.999999999% (11 9s)                                | 99.999%                                    | Depends on configuration                              |
-| **Scalability**   | Virtually unlimited                                  | Limited by volume size                     | Scales vertically & horizontally (with Aurora)        |
-| **Backup**        | Built-in versioning, lifecycle                       | Snapshots                                  | Automated backups, snapshots                          |
-| **Encryption**    | Server-side encryption (SSE), client-side encryption | AES-256 encryption supported               | Encryption at rest and in transit                     |
-| **Latency**       | High (not for frequent I/O)                          | Low (suitable for OS/files)                | Moderate (optimized for DB access)                    |
-| **Use Case**      | Static file hosting, backups, media storage          | EC2 root volume, file system, DB data disk | Managed SQL DBs without handling infra                |
+| Feature                  | S3 (Simple Storage Service)                            | EBS (Elastic Block Store)                              | RDS (Relational Database Service)                   |
+|--------------------------|--------------------------------------------------------|--------------------------------------------------------|-----------------------------------------------------|
+| Purpose                  | Object storage for files, backups, static assets       | Block storage for EC2 instances                        | Managed relational database service                 |
+| Storage Type             | Object-based                                            | Block-based                                             | Structured (SQL) data storage                     |
+| Data Access              | Access via HTTP(S), API, SDK                           | Mounted to an EC2 instance and accessed like a disk     | Accessed via SQL clients or applications           |
+| Persistence              | Independent, persists even if EC2 terminates           | Persists beyond EC2 lifecycle unless manually deleted   | Fully managed with automatic backups               |
+| Scalability              | Infinitely scalable                                    | Limited by volume size (up to 16 TiB per volume)        | Scales vertically (instance size) or read replicas |
+| Use Case Examples        | Static website hosting, data lake, media files         | OS volumes, database files, application storage         | Web apps needing relational DBs (MySQL, PostgreSQL)|
+| Availability & Durability| 99.999999999% durability (11 9s), regional redundancy  | Within an AZ (unless using snapshots or replication)    | Multi-AZ for HA, automatic backups and failover    |
+| Performance              | High throughput, eventual consistency                  | Low-latency, high IOPS                                  | Depends on instance type and DB engine             |
+| Backup/Recovery          | Versioning, lifecycle rules, cross-region replication  | Snapshots and volume cloning                            | Point-in-time recovery, snapshots, multi-AZ        |
+| Management               | Fully managed by AWS                                   | User-managed (create/delete volumes)                    | Fully managed (automated patching, backups)        |
+| Cost Model               | Pay for storage and requests                           | Pay for provisioned size and IOPS                       | Pay per instance size, storage, and usage          |
 
 ---
 
